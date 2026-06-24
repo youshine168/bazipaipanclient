@@ -476,8 +476,7 @@ body.dark-mode #quickInfoCard{background:var(--card)!important;border-color:var(
         想知道感情、事業、財運怎麼走，或想諮詢合婚、擇日（婚嫁、開業、搬家），<br>
         歡迎加 LINE 直接詢問老師，提供個人化的命理與陽宅建議。
       </div>
-      <a href="https://line.me/R/ti/p/@weiliang2862" target="_blank" rel="noopener" style="display:inline-block;padding:13px 32px;background:#06C755;color:#FFF;font-size:15px;font-weight:600;letter-spacing:2px;text-decoration:none;border-radius:4px">💬 加LINE諮詢老師</a>
-      <div style="font-size:11px;color:#8A7E68;margin-top:14px;letter-spacing:1px">LINE ID：@weiliang2862</div>
+      <a href="https://line.me/R/ti/p/@735hkzpz" target="_blank" rel="noopener" style="display:inline-block;padding:13px 32px;background:#06C755;color:#FFF;font-size:15px;font-weight:600;letter-spacing:2px;text-decoration:none;border-radius:4px">💬 加LINE諮詢老師</a>
     </div>
 
     <!-- ── 免責聲明 ── -->
@@ -908,7 +907,6 @@ function setGender(g,btn){gGender=g;document.querySelectorAll(".gender-btn:not(.
 // ══════════════════════════════════════════
 const LOCKED_TABS=[1,2,3,4,7,9]; // 性格、健康、關係、天賦(十神)、流月、感情
 const UNLOCK_KEY='bazi_unlock_v1';
-const UNLOCK_DAYS=30;
 
 // Google Apps Script 序號驗證網址（請替換成你的實際網址）
 const UNLOCK_API_URL='https://script.google.com/macros/s/AKfycbxNFNmSUvH7xXv2hWEITs31gOriVTCqigjlEmB5MPsEH_GyImJwUL45v8DyAc5Gvr9Ueg/exec';
@@ -917,21 +915,8 @@ function isUnlocked(){
   try{
     var data=JSON.parse(localStorage.getItem(UNLOCK_KEY)||'null');
     if(!data||!data.unlockedAt) return false;
-    var elapsed=Date.now()-data.unlockedAt;
-    var maxMs=UNLOCK_DAYS*24*60*60*1000;
-    return elapsed<maxMs;
+    return true; // 永久解鎖，不再判斷天數
   }catch(e){ return false; }
-}
-
-function getUnlockDaysLeft(){
-  try{
-    var data=JSON.parse(localStorage.getItem(UNLOCK_KEY)||'null');
-    if(!data||!data.unlockedAt) return 0;
-    var elapsed=Date.now()-data.unlockedAt;
-    var maxMs=UNLOCK_DAYS*24*60*60*1000;
-    var left=Math.ceil((maxMs-elapsed)/(24*60*60*1000));
-    return left>0?left:0;
-  }catch(e){ return 0; }
 }
 
 function setUnlocked(){
@@ -951,13 +936,13 @@ function showUnlockModal(){
       <div style="text-align:center;margin-bottom:18px">
         <div style="font-size:32px;margin-bottom:10px">🔒</div>
         <div style="font-size:17px;font-weight:700;color:#2A2218;margin-bottom:6px">解鎖完整命盤分析</div>
-        <div style="font-size:13px;color:#9A8868;line-height:1.7">解鎖後可查看性格、健康、關係、感情、天賦十神、每月運勢等完整內容，效期30天</div>
+        <div style="font-size:13px;color:#9A8868;line-height:1.7">解鎖後可查看性格、健康、關係、感情、天賦十神、每月運勢等完整內容</div>
       </div>
       <input id="unlockCodeInput" type="text" placeholder="請輸入解鎖序號" style="width:100%;padding:11px 14px;font-size:14px;font-family:inherit;border:1px solid #D8CDB8;border-radius:4px;margin-bottom:10px;box-sizing:border-box;text-align:center;letter-spacing:2px">
       <div id="unlockError" style="display:none;font-size:12px;color:#A85838;text-align:center;margin-bottom:10px"></div>
       <button onclick="submitUnlockCode()" style="width:100%;padding:12px;font-size:14px;font-family:inherit;background:#2A2218;color:#FFF;border:none;border-radius:4px;cursor:pointer;font-weight:600;letter-spacing:2px;margin-bottom:10px">確認解鎖</button>
       <div style="text-align:center;margin-bottom:14px">
-        <a href="https://line.me/R/ti/p/@weiliang2862" target="_blank" rel="noopener" style="font-size:12px;color:#06C755;text-decoration:none">還沒有序號？點此加LINE洽詢購買 →</a>
+        <a href="https://line.me/R/ti/p/@735hkzpz" target="_blank" rel="noopener" style="font-size:12px;color:#06C755;text-decoration:none">還沒有序號？點此加LINE洽詢購買 →</a>
       </div>
       <div style="text-align:center">
         <button onclick="closeUnlockModal()" style="font-size:12px;color:#B0A488;background:none;border:none;cursor:pointer;text-decoration:underline">先繼續看免費內容</button>
@@ -1033,9 +1018,8 @@ function renderLockState(){
   var banner=document.getElementById('unlockStatusBanner');
   if(banner){
     if(unlocked){
-      var daysLeft=getUnlockDaysLeft();
       banner.style.display='flex';
-      banner.innerHTML='<span style="color:#5A7A60">✓ 已解鎖完整內容</span><span style="color:#B0A488;margin-left:8px">剩餘 '+daysLeft+' 天</span>';
+      banner.innerHTML='<span style="color:#5A7A60">✓ 已解鎖完整內容</span>';
     } else {
       banner.style.display='flex';
       banner.innerHTML='<span style="color:#A85838">🔒 部分內容尚未解鎖</span><button onclick="showUnlockModal()" style="margin-left:10px;padding:3px 12px;font-size:12px;font-family:inherit;background:#2A2218;color:#FFF;border:none;cursor:pointer">立即解鎖</button>';
@@ -1081,7 +1065,7 @@ function showLockedContent(tabIndex){
     <div class="card" style="text-align:center;padding:40px 24px">
       <div style="font-size:36px;margin-bottom:14px">🔒</div>
       <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">「${tabNames[tabIndex]||''}」為付費解鎖內容</div>
-      <div style="font-size:13px;color:var(--text3);line-height:1.8;margin-bottom:20px">解鎖後即可查看完整的性格、健康、關係、感情、天賦十神、每月運勢分析，效期30天</div>
+      <div style="font-size:13px;color:var(--text3);line-height:1.8;margin-bottom:20px">解鎖後即可查看完整的性格、健康、關係、感情、天賦十神、每月運勢分析</div>
       <button onclick="showUnlockModal()" style="padding:11px 30px;font-size:14px;font-family:inherit;background:var(--ink);color:#FFF;border:none;cursor:pointer;letter-spacing:1px">立即解鎖</button>
     </div>
   `;
@@ -2417,7 +2401,7 @@ window.onload=()=>{
 </script>
 
 <div id="floatBtnGroup" style="position:fixed;right:16px;bottom:24px;z-index:500;display:flex;flex-direction:column;gap:10px;align-items:flex-end">
-  <a href="https://line.me/R/ti/p/@weiliang2862" target="_blank" rel="noopener" style="width:44px;height:44px;border-radius:50%;background:#06C755;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.25)" title="加LINE諮詢">
+  <a href="https://line.me/R/ti/p/@735hkzpz" target="_blank" rel="noopener" style="width:44px;height:44px;border-radius:50%;background:#06C755;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.25)" title="加LINE諮詢">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.346 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.349 0 .63.285.63.63v4.141h1.756c.349 0 .63.283.63.63 0 .344-.281.629-.63.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" fill="#FFFFFF"/></svg>
   </a>
   <a href="https://www.instagram.com/yuhwang2862" target="_blank" rel="noopener" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5);display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.25)" title="追蹤IG">
