@@ -501,8 +501,8 @@ body.dark-mode #quickInfoCard{background:var(--card)!important;border-color:var(
   var igId=qp.get('ig')||'';
   var unlockApi=qp.get('unlockapi')||'';
   window.STORAGE_PREFIX = pid ? ('p_'+pid+'_') : '';
-  window.PARTNER_LINE_URL = lineId ? ('https://line.me/R/ti/p/@'+lineId) : null;
-  window.PARTNER_IG_URL = igId ? ('https://www.instagram.com/'+igId) : null;
+  window.PARTNER_LINE_URL = lineId ? (lineId.indexOf('http')===0 ? lineId : ('https://line.me/R/ti/p/@'+lineId)) : null;
+  window.PARTNER_IG_URL = igId ? (igId.indexOf('http')===0 ? igId : ('https://www.instagram.com/'+igId)) : null;
   window.PARTNER_UNLOCK_API = unlockApi ? decodeURIComponent(unlockApi) : null;
   document.addEventListener('DOMContentLoaded', function(){
     if(window.PARTNER_LINE_URL){
