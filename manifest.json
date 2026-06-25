@@ -1,0 +1,23 @@
+{
+  "name": "光耀命盤解析",
+  "short_name": "光耀命盤",
+  "description": "免費線上八字排盤，輸入生辰立即看命盤、性格、健康、運勢完整分析",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F2EFEA",
+  "theme_color": "#F2EFEA",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

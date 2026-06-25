@@ -172,8 +172,37 @@ body.dark-mode #calNote{background:#141210!important;border-color:#2C2A22!import
 body.dark-mode #quickInfoCard{background:var(--card)!important;border-color:var(--border)!important}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="manifest" href="manifest.json">
 </head>
 <body>
+
+<!-- 安裝橫幅（Android / 電腦版 Chrome）：偵測到可安裝才出現 -->
+<div id="installBanner" style="display:none; position:fixed; left:0; right:0; bottom:0; z-index:9999; background:var(--card); border-top:1px solid var(--border); padding:12px 16px; box-shadow:0 -4px 16px var(--shadow);">
+    <div style="max-width:480px; margin:0 auto; display:flex; align-items:center; gap:12px;">
+        <img src="icon-192.png" alt="光耀命盤解析" style="width:40px; height:40px; border-radius:10px; flex-shrink:0;">
+        <div style="flex:1; min-width:0;">
+            <div style="color:var(--text); font-size:13px; font-weight:700; font-family:'Noto Serif TC',serif;">加入主畫面</div>
+            <div style="color:var(--text2); font-size:11px;">像 APP 一樣使用光耀命盤解析</div>
+        </div>
+        <button id="installBtn" style="background:var(--accent); color:var(--bg); border:none; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0;">安裝</button>
+        <button id="installDismissBtn" aria-label="關閉" style="background:none; border:none; color:var(--text3); font-size:18px; cursor:pointer; padding:0 4px; flex-shrink:0;">&times;</button>
+    </div>
+</div>
+
+<!-- 引導橫幅（iPhone / iPad Safari）：Safari 不支援自動跳出安裝視窗，改用文字引導 -->
+<div id="iosInstallBanner" style="display:none; position:fixed; left:0; right:0; bottom:0; z-index:9999; background:var(--card); border-top:1px solid var(--border); padding:12px 16px; box-shadow:0 -4px 16px var(--shadow);">
+    <div style="max-width:480px; margin:0 auto; display:flex; align-items:center; gap:12px;">
+        <img src="icon-192.png" alt="光耀命盤解析" style="width:40px; height:40px; border-radius:10px; flex-shrink:0;">
+        <div style="flex:1; min-width:0; font-size:12px; color:var(--text); line-height:1.65;">
+            加入主畫面：點下方
+            <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border:1.4px solid var(--text); border-radius:4px; vertical-align:-4px; margin:0 2px;">
+                <svg width="9" height="11" viewBox="0 0 9 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.5 0L1 3.6H3.2V8H5.8V3.6H8L4.5 0Z" fill="currentColor"/><rect x="0.5" y="8.6" width="8" height="1.6" rx="0.4" fill="currentColor"/></svg>
+            </span>
+            分享按鈕，再選「加入主畫面」
+        </div>
+        <button id="iosInstallDismissBtn" aria-label="關閉" style="background:none; border:none; color:var(--text3); font-size:18px; cursor:pointer; padding:0 4px; flex-shrink:0;">&times;</button>
+    </div>
+</div>
 <div class="header">
   <button id="darkBtn" onclick="toggleDark()" style="position:absolute;top:14px;right:14px;padding:4px 12px;font-size:10px;font-family:inherit;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer;letter-spacing:1px">🌙 深色</button>
   <div class="header-en">YOUSHINE</div>
@@ -2435,5 +2464,85 @@ window.onload=()=>{
   </a>
   <button id="backTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;width:44px;height:44px;border-radius:50%;background:#1C1A17;color:#FFF;border:2px solid #FFFFFF;font-size:18px;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.35);align-items:center;justify-content:center">↑</button>
 </div>
+
+<script>
+// 註冊 Service Worker，讓網站符合「可安裝」條件
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(console.error);
+  });
+}
+
+(function () {
+  var androidBanner = document.getElementById('installBanner');
+  var iosBanner = document.getElementById('iosInstallBanner');
+  var installBtn = document.getElementById('installBtn');
+  var dismissBtn = document.getElementById('installDismissBtn');
+  var iosDismissBtn = document.getElementById('iosInstallDismissBtn');
+  var deferredInstallPrompt = null;
+
+  var DISMISS_KEY = 'guangyao_bazi_install_dismiss_until';
+  var IOS_DISMISS_KEY = 'guangyao_bazi_ios_install_dismiss_until';
+
+  function isDismissedRecently(key) {
+    var until = localStorage.getItem(key);
+    return until && Date.now() < Number(until);
+  }
+  function setDismissed(key) {
+    localStorage.setItem(key, String(Date.now() + 7 * 24 * 60 * 60 * 1000)); // 7 天內不再跳出
+  }
+  function isStandaloneMode() {
+    return (window.navigator.standalone === true) ||
+           window.matchMedia('(display-mode: standalone)').matches;
+  }
+  function isIos() {
+    var ua = window.navigator.userAgent;
+    return /iPad|iPhone|iPod/.test(ua) ||
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  // Android / 電腦版 Chrome：監聽瀏覽器原生的可安裝事件
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (!isDismissedRecently(DISMISS_KEY) && androidBanner) {
+      androidBanner.style.display = 'block';
+    }
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', function () {
+      if (androidBanner) androidBanner.style.display = 'none';
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(function () {
+          deferredInstallPrompt = null;
+        });
+      }
+    });
+  }
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function () {
+      if (androidBanner) androidBanner.style.display = 'none';
+      setDismissed(DISMISS_KEY);
+    });
+  }
+  window.addEventListener('appinstalled', function () {
+    if (androidBanner) androidBanner.style.display = 'none';
+    deferredInstallPrompt = null;
+  });
+
+  // iPhone / iPad Safari：沒有 beforeinstallprompt 事件，改用文字引導
+  if (isIos() && !isStandaloneMode() && !isDismissedRecently(IOS_DISMISS_KEY) && iosBanner) {
+    iosBanner.style.display = 'block';
+  }
+  if (iosDismissBtn) {
+    iosDismissBtn.addEventListener('click', function () {
+      if (iosBanner) iosBanner.style.display = 'none';
+      setDismissed(IOS_DISMISS_KEY);
+    });
+  }
+})();
+</script>
 </body>
 </html>
